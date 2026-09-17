@@ -17,13 +17,13 @@ public class MainActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     requestWindowFeature(Window.FEATURE_NO_TITLE);
-    getWindow().setStatusBarColor(Color.parseColor("#FAF6ED"));
+    getWindow().setStatusBarColor(Color.parseColor("#F6F0E4"));
 
     server = new AssetServer(getAssets());
     server.startAndWait();
 
     WebView web = new WebView(this);
-    web.setBackgroundColor(Color.parseColor("#FAF6ED"));
+    web.setBackgroundColor(Color.parseColor("#F6F0E4"));
     WebSettings s = web.getSettings();
     s.setJavaScriptEnabled(true);
     s.setDomStorageEnabled(true);
