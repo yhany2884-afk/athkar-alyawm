@@ -86,15 +86,28 @@ public class AssetServer extends Thread {
 
   private void serve(OutputStream out, String path) throws IOException {
     String rel = path.startsWith("/") ? path.substring(1) : path;
+    if (rel.contains("..")) rel = "index.html";
     byte[] body = readAsset("www/" + rel);
-    if (body == null) body = readAsset("www/index.html");
+    boolean fallback = false;
+    if (body == null) {
+      boolean file = rel.contains(".");
+      if (file) {
+        byte[] msg = "not found".getBytes("UTF-8");
+        out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: " + msg.length + "\r\nConnection: close\r\n\r\n").getBytes("UTF-8"));
+        out.write(msg);
+        return;
+      }
+      body = readAsset("www/index.html");
+      fallback = true;
+    }
     if (body == null) {
       byte[] msg = "not found".getBytes("UTF-8");
       out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: " + msg.length + "\r\nConnection: close\r\n\r\n").getBytes("UTF-8"));
       out.write(msg);
       return;
     }
-    String mime = mime(rel);
+    String mime = fallback || rel.endsWith(".html") || rel.isEmpty() ? "text/html; charset=utf-8" : mime(rel);
+    String cache = fallback || mime.startsWith("text/html") ? "no-cache" : "public, max-age=86400";
     String headers =
         "HTTP/1.1 200 OK\r\n"
             + "Content-Type: "
@@ -103,7 +116,9 @@ public class AssetServer extends Thread {
             + "Content-Length: "
             + body.length
             + "\r\n"
-            + "Cache-Control: public, max-age=86400\r\n"
+            + "Cache-Control: "
+            + cache
+            + "\r\n"
             + "Connection: close\r\n\r\n";
     out.write(headers.getBytes("UTF-8"));
     out.write(body);

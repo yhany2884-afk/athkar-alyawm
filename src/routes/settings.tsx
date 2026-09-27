@@ -11,6 +11,7 @@ import {
   type PatternId,
   type UiFontId,
 } from "@/lib/theme";
+import { PRAYER_METHODS, type PrayerMethod } from "@/lib/prayer";
 import { useAppStore } from "@/lib/store";
 import { BUILTIN_WALLPAPERS } from "@/lib/wallpapers";
 import {
@@ -110,7 +111,7 @@ function SettingsPage() {
 
         <section>
           <h2 className="mb-3 text-sm font-semibold">طابع جاهز</h2>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {PRESETS.map((p) => (
               <button
                 key={p.id}
@@ -130,6 +131,107 @@ function SettingsPage() {
                 <span className="text-xs">{p.name}</span>
               </button>
             ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-sm font-semibold">مواقيت الصلاة</h2>
+          <p className="mb-3 text-xs text-muted">
+            الحساب على الجهاز من موقع القبلة المحفوظ، بلا اتصال.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {PRAYER_METHODS.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => patch({ prayerMethod: m.id as PrayerMethod })}
+                className={cn(
+                  "tap h-11 text-sm",
+                  (settings.prayerMethod ?? "egypt") === m.id
+                    ? "bg-accent text-accent-fg"
+                    : "border border-fg/12 bg-elevated",
+                )}
+              >
+                {m.name}
+              </button>
+            ))}
+          </div>
+          <label className="mt-4 block">
+            <span className="mb-2 flex justify-between text-sm">
+              استدارة البطاقات
+              <span className="tabular-nums text-muted">{settings.cardRound ?? 24}</span>
+            </span>
+            <input
+              type="range"
+              min={12}
+              max={32}
+              value={settings.cardRound ?? 24}
+              onChange={(e) => patch({ cardRound: Number(e.target.value) })}
+              className="w-full accent-[var(--color-accent)]"
+            />
+          </label>
+          <h3 className="mb-2 mt-5 text-sm font-semibold">صيغة الساعة</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => patch({ clockStyle: "ampm" })}
+              className={cn(
+                "tap h-11 text-sm",
+                (settings.clockStyle ?? "ampm") === "ampm"
+                  ? "bg-accent text-accent-fg"
+                  : "border border-fg/12 bg-elevated",
+              )}
+            >
+              5:26 AM
+            </button>
+            <button
+              type="button"
+              onClick={() => patch({ clockStyle: "ar" })}
+              className={cn(
+                "tap h-11 text-sm",
+                settings.clockStyle === "ar"
+                  ? "bg-accent text-accent-fg"
+                  : "border border-fg/12 bg-elevated",
+              )}
+            >
+              ٥:٢٦ ص
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-1 text-sm font-semibold">بطاقات الرئيسية</h2>
+          <p className="mb-3 text-xs text-muted">
+            أخفِ ما لا تحتاجه. بطاقة الصلاة تبقى، وباقي البطاقات اختيارك.
+          </p>
+          <Toggle
+            label="سماء ليلية في بطاقة الصلاة"
+            checked={settings.prayerSky !== false}
+            onChange={(prayerSky) => patch({ prayerSky })}
+            on="ظاهرة"
+            off="لون سادة"
+          />
+          <Toggle
+            label="بطاقة الأذكار"
+            checked={settings.homeAdhkar !== false}
+            onChange={(homeAdhkar) => patch({ homeAdhkar })}
+          />
+          <Toggle
+            label="بطاقة التقدم"
+            checked={settings.homeProgress !== false}
+            onChange={(homeProgress) => patch({ homeProgress })}
+          />
+          <Toggle
+            label="بطاقة متابعة السورة"
+            checked={settings.homeContinue !== false}
+            onChange={(homeContinue) => patch({ homeContinue })}
+          />
+          <div className="mt-3">
+            <ColorField
+              label="لون اسم التطبيق"
+              value={settings.mark || "#1F6B4A"}
+              onChange={(mark) => patch({ mark })}
+            />
           </div>
         </section>
 
@@ -500,7 +602,8 @@ function SettingsPage() {
         <section className="space-y-3">
           <h2 className="text-sm font-semibold">البيانات</h2>
           <p className="text-xs text-muted">
-            الأذكار الأصلية محفوظة في التطبيق ولا تُمس. عدّاد اليوم والمفضلة والملاحظات
+            المصحف كامل (٦٢٣٦ آية) وخطه محفوظان داخل التطبيق، ويُفتحان بلا إنترنت.
+            الأذكار الأصلية لا تُمس. عدّاد اليوم والمفضلة والملاحظات
             وأذكارك الشخصية وصورك تُحفظ على هذا الجهاز فقط.
             {customCount ? ` لديك ${customCount} ذكرًا شخصيًا.` : ""}
           </p>

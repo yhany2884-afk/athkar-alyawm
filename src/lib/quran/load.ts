@@ -20,8 +20,10 @@ const BY_ID = new Map<number, QuranSurah>(QURAN.map((s) => [s.id, s]));
 const BASMALA_RE = /^بِسۡمِ[\s\S]{0,40}?ٱلرَّحِيمِ\s*/u;
 
 export function stripLeadingBasmala(text: string): string {
-  const trimmed = text.replace(BASMALA_RE, "").trim();
-  return trimmed || text;
+  const source = text ?? "";
+  const trimmed = source.replace(BASMALA_RE, "").trim();
+  if (!trimmed || trimmed.length < 8) return source;
+  return trimmed;
 }
 
 export function loadQuran(): QuranSurah[] {

@@ -1,13 +1,56 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Amiri";
+  src: url("/fonts/amiri-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cairo";
+  src: url("/fonts/cairo-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cairo";
+  src: url("/fonts/cairo-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Amiri Quran";
+  src: url("/fonts/amiri-quran.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Scheherazade New";
+  src: url("/fonts/scheherazade.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Naskh Arabic";
+  src: url("/fonts/naskh-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  --color-bg: #f6f0e4;
-  --color-surface: #ede4d4;
-  --color-elevated: #fff9f0;
-  --color-fg: #2c261e;
-  --color-muted: #7a7164;
-  --color-accent: #9a6b3a;
-  --color-accent-fg: #fff9f0;
+  --color-bg: #f5f7fb;
+  --color-surface: #e7eef6;
+  --color-elevated: #ffffff;
+  --color-fg: #1c2430;
+  --color-muted: #6c7786;
+  --color-accent: #163a5f;
+  --color-accent-fg: #ffffff;
   --color-danger: #8a3a32;
   --font-arabic: "Amiri", "Noto Naskh Arabic", serif;
   --font-ui: "Cairo", "IBM Plex Sans Arabic", sans-serif;
@@ -73,9 +116,21 @@
 }
 
 .mushaf-ayah {
-  font-family: var(--font-arabic);
+  font-family: "Amiri Quran", "Scheherazade New", "Noto Naskh Arabic", "Amiri", serif;
   font-size: var(--dhikr-size, 1.7rem);
-  line-height: 2.2;
+  line-height: 2.35;
+}
+.ayah-line {
+  display: block;
+  margin: 0 0 0.85rem;
+  text-align: right;
+}
+.ayah-num {
+  display: inline-block;
+  margin-inline-start: 0.35rem;
+  color: var(--color-accent);
+  font-family: var(--font-ui);
+  font-size: 0.72em;
 }
 
 .surface-card {
@@ -154,9 +209,15 @@
 .nav-glass.is-float {
   inset-inline: 0.7rem;
   bottom: max(0.45rem, env(safe-area-inset-bottom));
-  border-radius: 1.7rem;
-  padding-bottom: 0.2rem;
-  padding-top: 0.15rem;
+  border-radius: 1.85rem;
+  padding-bottom: 0.15rem;
+  padding-top: 0.2rem;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, #fff 72%, transparent), transparent 48%),
+    color-mix(in oklab, var(--color-elevated) 92%, transparent);
+  box-shadow:
+    0 10px 30px color-mix(in oklab, #163a5f 14%, transparent),
+    inset 0 1px 0 color-mix(in oklab, #fff 80%, transparent);
 }
 .nav-glass.is-dock {
   inset-inline: 0;
@@ -177,10 +238,12 @@ html[data-glass="0"] .nav-glass,
 .nav-tab {
   position: relative;
   display: flex;
-  min-height: 3rem;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-height: 3.35rem;
   align-items: center;
-  justify-content: center;
-  padding-inline: 0.1rem;
+  justify-content: flex-end;
+  padding: 0.2rem 0.1rem 0.35rem;
   color: var(--color-muted);
   transition:
     color 220ms var(--ease-out),
@@ -214,14 +277,71 @@ html[data-glass="0"] .nav-glass,
 .nav-tab:active .nav-pill {
   transform: scale(1.06);
 }
+.nav-ico {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+}
+.nav-tab.is-home.is-on .nav-ico {
+  width: 3.35rem;
+  height: 3.35rem;
+  margin-top: -1.45rem;
+  margin-bottom: 0.05rem;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  box-shadow: 0 8px 16px color-mix(in oklab, var(--color-accent) 34%, transparent);
+}
+.nav-tab.is-home.is-on .nav-label {
+  color: var(--color-fg);
+  font-weight: 600;
+}
+.nav-tab.is-on:not(.is-home) {
+  color: var(--color-accent);
+}
+.wordmark {
+  font-family: "Amiri", "Noto Naskh Arabic", serif;
+  font-size: 1.95rem;
+  font-weight: 700;
+  color: var(--color-mark, #1f6b4a);
+  letter-spacing: 0;
+}
+.home-card {
+  background: var(--color-elevated);
+  box-shadow: 0 10px 26px color-mix(in oklab, #163a5f 7%, transparent);
+}
+.home-soft {
+  background: color-mix(in oklab, var(--color-surface) 88%, #fff);
+}
+.prayer-hero {
+  background:
+    linear-gradient(180deg, rgba(7, 18, 40, 0.08) 0%, rgba(6, 14, 32, 0.28) 55%, rgba(4, 10, 24, 0.55) 100%),
+    url("/prayer-sky.jpg") center 62% / cover no-repeat;
+  min-height: 15.2rem;
+  box-shadow: 0 14px 30px color-mix(in oklab, #0c2348 22%, transparent);
+}
+.prayer-hero.is-flat {
+  background: linear-gradient(160deg, color-mix(in oklab, var(--color-accent) 82%, #081426), #081426);
+}
+.progress-ring {
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, var(--color-elevated) 58%, transparent 59%),
+    conic-gradient(
+      from -90deg,
+      var(--color-accent) calc(var(--p, 0) * 1%),
+      color-mix(in oklab, var(--color-fg) 10%, #fff) 0
+    );
+}
 .nav-label {
   position: relative;
   z-index: 1;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
 }
 @media (min-width: 400px) {
   .nav-label {
-    font-size: 0.86rem;
+    font-size: 0.8rem;
   }
 }
 

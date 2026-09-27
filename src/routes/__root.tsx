@@ -12,8 +12,6 @@ import appCss from "../styles.css?url";
 const APP_NAME = "أذكار اليوم";
 const APP_DESC =
   "مصحف حفص كامل، أذكار الصباح والمساء والصلاة والنوم، كتب البخاري ومسلم والسنن، وبوصلة القبلة. تطبيق مجاني يعمل دون إنترنت على أندرويد وآيفون وويندوز وماك.";
-const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;500;600;700&display=swap";
 
 const JSON_LD = {
   "@context": "https://schema.org",
@@ -44,7 +42,7 @@ export const Route = createRootRoute({
         content:
           "أذكار, أذكار الصباح, أذكار المساء, مصحف, قرآن حفص, قبلة, صحيح البخاري, صحيح مسلم, تطبيق إسلامي, أذكار اليوم",
       },
-      { name: "theme-color", content: "#F6F0E4" },
+      { name: "theme-color", content: "#F5F7FB" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
@@ -57,13 +55,6 @@ export const Route = createRootRoute({
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "stylesheet", href: appCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-      },
-      { rel: "stylesheet", href: FONT_HREF },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
     scripts: [

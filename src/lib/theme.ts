@@ -11,7 +11,7 @@ export type UiFontId = "cairo" | "plex" | "amiri";
 
 export type NavStyle = "float" | "dock";
 
-export type PresetId = "paper" | "white" | "night" | "ink" | "custom";
+export type PresetId = "day" | "paper" | "white" | "night" | "ink" | "custom";
 
 export type ThemeSettings = {
   preset: PresetId;
@@ -43,6 +43,15 @@ export type ThemeSettings = {
   navDim: number;
   navBlur: number;
   navSpecular: number;
+  prayerMethod: "egypt" | "mwl" | "umm" | "karachi";
+  cardRound: number;
+  uiGen: number;
+  clockStyle: "ampm" | "ar";
+  homeAdhkar: boolean;
+  homeProgress: boolean;
+  homeContinue: boolean;
+  prayerSky: boolean;
+  mark: string;
 };
 
 export type ThemePreset = {
@@ -58,6 +67,17 @@ export type ThemePreset = {
 };
 
 export const PRESETS: ThemePreset[] = [
+  {
+    id: "day",
+    name: "نهار",
+    bg: "#F5F7FB",
+    surface: "#E7EEF6",
+    elevated: "#FFFFFF",
+    fg: "#1C2430",
+    muted: "#6C7786",
+    accent: "#163A5F",
+    accentFg: "#FFFFFF",
+  },
   {
     id: "paper",
     name: "ورق",
@@ -143,14 +163,14 @@ export const PATTERNS: { id: PatternId; name: string }[] = [
 ];
 
 export const DEFAULT_SETTINGS: ThemeSettings = {
-  preset: "paper",
-  bg: PRESETS[0].bg,
-  surface: PRESETS[0].surface,
-  elevated: PRESETS[0].elevated,
-  fg: PRESETS[0].fg,
-  muted: PRESETS[0].muted,
-  accent: PRESETS[0].accent,
-  accentFg: PRESETS[0].accentFg,
+  preset: "day",
+  bg: "#F5F7FB",
+  surface: "#E7EEF6",
+  elevated: "#FFFFFF",
+  fg: "#1C2430",
+  muted: "#6C7786",
+  accent: "#163A5F",
+  accentFg: "#FFFFFF",
   pattern: "none",
   patternStrength: 8,
   arabicFont: "amiri",
@@ -172,6 +192,15 @@ export const DEFAULT_SETTINGS: ThemeSettings = {
   navDim: 26,
   navBlur: 64,
   navSpecular: 58,
+  prayerMethod: "egypt",
+  cardRound: 24,
+  uiGen: 2,
+  clockStyle: "ampm",
+  homeAdhkar: true,
+  homeProgress: true,
+  homeContinue: true,
+  prayerSky: true,
+  mark: "#1F6B4A",
 };
 
 export function fontStack(
@@ -215,6 +244,7 @@ export function applyThemeToDocument(s: ThemeSettings) {
     "--color-muted": s.muted,
     "--color-accent": s.accent,
     "--color-accent-fg": s.accentFg,
+    "--color-mark": s.mark || "#1F6B4A",
     "--font-arabic": fontStack(s.arabicFont, "arabic"),
     "--font-ui": fontStack(s.uiFont, "ui"),
     "--dhikr-size": dhikrFontSize(s.dhikrSize),
@@ -235,6 +265,7 @@ export function applyThemeToDocument(s: ThemeSettings) {
     "--nav-blur": `${Math.round(12 + blur * 0.36)}px`,
     "--nav-sat": String(1.05 + spec * 0.007),
     "--nav-spec": `${Math.round(18 + spec * 0.55)}%`,
+    "--radius-card": `${s.cardRound ?? 24}px`,
   };
   for (const [k, v] of Object.entries(vars)) {
     r.style.setProperty(k, v);

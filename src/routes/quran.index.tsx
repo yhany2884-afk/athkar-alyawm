@@ -39,15 +39,11 @@ function QuranIndex() {
           <Link
             to="/quran/$n"
             params={{ n: String(last.id) }}
-            className="mb-5 block border border-fg/12 bg-elevated px-4 py-3 tap"
+            search={{ ayah: lastAyah || 1 }}
+            className="home-card mb-5 block px-4 py-4 tap"
           >
-            <span className="block text-xs text-muted">متابعة القراءة</span>
-            <span className="flex items-baseline justify-between gap-3">
-              <span className="font-arabic text-lg">سورة {last.name}</span>
-              <span className="text-sm tabular-nums text-muted">
-                آية {lastAyah}
-              </span>
-            </span>
+            <span className="block text-lg font-semibold">متابعة سورة {last.name}</span>
+            <span className="mt-1 block text-sm text-muted">الآية {lastAyah || 1} · اضغط لمتابعة القراءة</span>
           </Link>
         ) : null}
 

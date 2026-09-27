@@ -55,7 +55,7 @@ export function periodGreeting(d = new Date()): { title: string; sub: string } {
     return { title: "أذكار الصباح", sub: "ابدأ يومك بذكر الله" };
   }
   if (p === "evening") {
-    return { title: "أذكار المساء", sub: "اختم نهارك بالحصن" };
+    return { title: "أذكار المساء", sub: "اختم يومك بطمأنينة" };
   }
   return { title: "أذكار النوم", sub: "نم على وترٍ من الذكر" };
 }

@@ -17,13 +17,13 @@ public class MainActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     requestWindowFeature(Window.FEATURE_NO_TITLE);
-    getWindow().setStatusBarColor(Color.parseColor("#F6F0E4"));
+    getWindow().setStatusBarColor(Color.parseColor("#F5F7FB"));
 
     server = new AssetServer(getAssets());
     server.startAndWait();
 
     WebView web = new WebView(this);
-    web.setBackgroundColor(Color.parseColor("#F6F0E4"));
+    web.setBackgroundColor(Color.parseColor("#F5F7FB"));
     WebSettings s = web.getSettings();
     s.setJavaScriptEnabled(true);
     s.setDomStorageEnabled(true);
@@ -33,7 +33,7 @@ public class MainActivity extends Activity {
     s.setUseWideViewPort(true);
     s.setSupportZoom(false);
     s.setMediaPlaybackRequiresUserGesture(false);
-    s.setCacheMode(WebSettings.LOAD_DEFAULT);
+    s.setCacheMode(WebSettings.LOAD_NO_CACHE);
     web.setWebViewClient(new WebViewClient());
     web.setWebChromeClient(
         new WebChromeClient() {

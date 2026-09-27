@@ -31,6 +31,7 @@ export type AppState = {
   lastDate: string;
   lastSurah: number;
   lastAyah: number;
+  quranStarted: boolean;
   papers: CustomPaperMeta[];
   qibla: QiblaFix | null;
   hasHydrated: boolean;
@@ -69,10 +70,12 @@ export const useAppStore = create<AppState>()(
       lastDate: todayStamp(),
       lastSurah: 1,
       lastAyah: 1,
+      quranStarted: false,
       papers: [],
       qibla: null,
       hasHydrated: false,
-      setQuranCursor: (surah, ayah) => set({ lastSurah: surah, lastAyah: ayah }),
+      setQuranCursor: (surah, ayah) =>
+        set({ lastSurah: surah, lastAyah: ayah, quranStarted: true }),
       setQibla: (lat, lng, label) =>
         set({
           qibla: {
@@ -172,6 +175,7 @@ export const useAppStore = create<AppState>()(
           "muted",
           "accent",
           "accentFg",
+          "mark",
         ] as const;
         const touched = colorKeys.some((k) => k in p);
         if (touched) next.preset = "custom";
@@ -215,13 +219,37 @@ export const useAppStore = create<AppState>()(
         lastDate: s.lastDate,
         lastSurah: s.lastSurah,
         lastAyah: s.lastAyah,
+        quranStarted: s.quranStarted,
         papers: s.papers,
         qibla: s.qibla,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.settings = { ...DEFAULT_SETTINGS, ...state.settings };
-          if (state.settings.preset === "paper" || state.settings.preset === "white") {
+          const raw = state.settings;
+          const firstCards = (raw.uiGen ?? 0) < 2;
+          state.settings = { ...DEFAULT_SETTINGS, ...raw, uiGen: 2 };
+          if (firstCards) {
+            const day = PRESETS.find((x) => x.id === "day");
+            if (day) {
+              state.settings = {
+                ...state.settings,
+                preset: "day",
+                bg: day.bg,
+                surface: day.surface,
+                elevated: day.elevated,
+                fg: day.fg,
+                muted: day.muted,
+                accent: day.accent,
+                accentFg: day.accentFg,
+                prayerMethod: "egypt",
+                cardRound: 24,
+              };
+            }
+          } else if (
+            state.settings.preset === "paper" ||
+            state.settings.preset === "white" ||
+            state.settings.preset === "day"
+          ) {
             const p = PRESETS.find((x) => x.id === state.settings.preset);
             if (p) {
               state.settings = {
@@ -237,6 +265,9 @@ export const useAppStore = create<AppState>()(
             }
           }
           state.papers = state.papers ?? [];
+          if (state.quranStarted == null) {
+            state.quranStarted = (state.lastSurah ?? 1) > 1 || (state.lastAyah ?? 1) > 1;
+          }
           if (state.qibla) {
             state.qibla = {
               ...state.qibla,

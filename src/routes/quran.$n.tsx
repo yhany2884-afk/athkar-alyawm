@@ -42,13 +42,15 @@ function SurahPage() {
     );
   }
 
+  const heading = `متابعة سورة ${meta.name}`;
+
   return (
-    <AppShell title={`سورة ${meta.name}`}>
+    <AppShell title={heading}>
       <main className="px-4 pt-4 pb-8">
         <article className="folio px-4 py-6 sm:px-6">
-          <p className="text-center font-arabic text-xl">سورة {meta.name}</p>
+          <p className="text-center text-lg font-semibold">{heading}</p>
           <p className="mt-1 mb-5 text-center text-xs text-muted">
-            {meta.makki ? "مكية" : "مدنية"} · {meta.count} آية
+            {meta.makki ? "مكية" : "مدنية"} · {surah.verses.length} آية محفوظة على الجهاز
           </p>
           {id !== 1 && id !== 9 ? (
             <p className="font-arabic mb-6 text-center text-xl">
@@ -59,20 +61,22 @@ function SurahPage() {
           <div className="mushaf-ayah text-justify">
             {surah.verses.map((text, i) => {
               const num = i + 1;
+              const raw = text ?? "";
               const shown =
                 id !== 1 && id !== 9 && num === 1
-                  ? stripLeadingBasmala(text)
-                  : text;
-              if (!shown) return null;
+                  ? stripLeadingBasmala(raw)
+                  : raw;
+              const line = (shown || raw).trim() ? (shown || raw) : raw;
               return (
-                <span
+                <p
                   key={num}
                   id={`a-${num}`}
+                  className="ayah-line"
                   onClick={() => setCursor(id, num)}
                 >
-                  {shown}
+                  {line}
                   <span className="ayah-num">{`﴿${num}﴾`}</span>
-                </span>
+                </p>
               );
             })}
           </div>

@@ -1,5 +1,5 @@
-/* أذكار اليوم — تخزين محلي للعمل دون إنترنت */
-const CACHE = "athkar-v1";
+/* أذكار اليوم — كل الملفات تُحفظ على الجهاز */
+const CACHE = "athkar-v5";
 const PRECACHE = [
   "/",
   "/quran",
@@ -7,27 +7,27 @@ const PRECACHE = [
   "/today",
   "/qibla",
   "/library",
-  "/install",
   "/favicon.svg",
   "/icon-192.png",
   "/icon-512.png",
   "/apple-touch-icon.png",
+  "/prayer-sky.jpg",
+  "/fonts/amiri-400.woff2",
+  "/fonts/amiri-quran.woff2",
+  "/fonts/cairo-400.woff2",
+  "/fonts/cairo-600.woff2",
+  "/fonts/naskh-400.woff2",
+  "/fonts/scheherazade.woff2",
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(PRECACHE).catch(() => undefined)),
-  );
+  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE).catch(() => undefined)));
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
-      ),
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))),
   );
   self.clients.claim();
 });
@@ -43,6 +43,29 @@ function cacheable(url) {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET" || !cacheable(req.url)) return;
+  const path = new URL(req.url).pathname;
+  const asset =
+    path.startsWith("/assets/") ||
+    path.startsWith("/fonts/") ||
+    path.startsWith("/wallpapers/") ||
+    /\.(?:js|css|woff2|json|png|svg|jpg|webp)$/.test(path);
+  if (asset) {
+    event.respondWith(
+      caches.match(req).then((hit) => {
+        const net = fetch(req)
+          .then((res) => {
+            if (res.ok) {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(req, copy));
+            }
+            return res;
+          })
+          .catch(() => hit);
+        return hit || net;
+      }),
+    );
+    return;
+  }
   event.respondWith(
     fetch(req)
       .then((res) => {
