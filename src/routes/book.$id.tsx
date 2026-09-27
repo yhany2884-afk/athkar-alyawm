@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout";
 import { loadBook, type Book, type Chapter } from "@/lib/library";
 import { arNum, parseArNum } from "@/lib/utils";
@@ -32,7 +32,7 @@ function BookPage() {
     };
   }, [id]);
 
-  const needle = q.trim();
+  const needle = useDeferredValue(q).trim();
   const chapters = useMemo(() => {
     if (!book) return [];
     if (!needle) return book.chapters;
@@ -233,7 +233,7 @@ function ChapterBody({
           ))
         : null}
       {slice.map((h, i) => (
-        <p key={`${ch.id}-${h.n}-${i}`} className="font-arabic mb-5 text-lg leading-loose">
+        <p key={`${ch.id}-${h.n}-${i}`} className="book-line font-arabic mb-5 text-lg leading-loose">
           <span className="ml-2 text-sm text-accent">{arNum(h.n)}</span>
           {h.text}
         </p>

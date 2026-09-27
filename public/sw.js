@@ -1,5 +1,5 @@
 /* أذكار اليوم — كل الملفات تُحفظ على الجهاز */
-const CACHE = "athkar-v5";
+const CACHE = "athkar-v6";
 const PRECACHE = [
   "/",
   "/quran",
@@ -44,6 +44,21 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET" || !cacheable(req.url)) return;
   const path = new URL(req.url).pathname;
+  if (req.mode === "navigate") {
+    event.respondWith(
+      caches.open(CACHE).then(async (cache) => {
+        const hit = await cache.match(req);
+        const net = fetch(req)
+          .then((res) => {
+            if (res.ok) cache.put(req, res.clone());
+            return res;
+          })
+          .catch(() => hit || cache.match("/"));
+        return hit || net;
+      }),
+    );
+    return;
+  }
   const asset =
     path.startsWith("/assets/") ||
     path.startsWith("/fonts/") ||

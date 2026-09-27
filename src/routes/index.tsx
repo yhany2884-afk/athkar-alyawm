@@ -9,6 +9,7 @@ import {
   prayerMinutes,
   PRAYER_LABEL,
   type PrayerId,
+  type PrayerMethod,
 } from "@/lib/prayer";
 import { SURAHS } from "@/lib/quran/meta";
 import { useAppStore } from "@/lib/store";
@@ -28,23 +29,17 @@ function Home() {
   const method = settings.prayerMethod ?? "egypt";
   const round = settings.cardRound ?? 24;
   const clockStyle = settings.clockStyle ?? "ampm";
-  const [now, setNow] = useState(() => new Date());
-  const [timesOpen, setTimesOpen] = useState(false);
+  const [periodNow, setPeriodNow] = useState(() => new Date());
 
   useEffect(() => {
-    const t = window.setInterval(() => setNow(new Date()), 1000);
+    const t = window.setInterval(() => setPeriodNow(new Date()), 60_000);
     return () => window.clearInterval(t);
   }, []);
 
   const place = qibla?.label || "القاهرة";
   const lat = qibla?.lat ?? 30.0444;
   const lng = qibla?.lng ?? 31.2357;
-  const clock = useMemo(
-    () => prayerMinutes(lat, lng, now, method),
-    [lat, lng, method, now.getFullYear(), now.getMonth(), now.getDate()],
-  );
-  const next = nextPrayer(clock, now);
-  const greet = periodGreeting(now);
+  const greet = periodGreeting(periodNow);
   const showAdhkar = settings.homeAdhkar !== false;
   const showProgress = settings.homeProgress !== false;
   const showContinue = settings.homeContinue !== false;
@@ -66,66 +61,15 @@ function Home() {
   return (
     <AppShell title="أذكار اليوم" wordmark>
       <main className="space-y-3 px-4 pt-2 pb-4">
-        <section
-          className={sky ? "prayer-hero relative overflow-hidden text-white" : "prayer-hero is-flat relative overflow-hidden text-white"}
-          style={{ borderRadius: r }}
-        >
-          <div className="relative z-10 p-4 pb-3">
-            <div className="flex items-start justify-between gap-3">
-              <p className="flex items-center gap-1.5 text-sm text-white/90">
-                الصلاة القادمة
-                <Bell />
-              </p>
-              <Link
-                to="/qibla"
-                className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs backdrop-blur-md"
-              >
-                <span>{place}</span>
-                <Pin />
-              </Link>
-            </div>
-            <p className="mt-7 text-start font-arabic text-[3.15rem] leading-none">{PRAYER_LABEL[next.id]}</p>
-            <p className="mt-2 text-start text-[2.05rem] font-semibold tracking-tight">
-              <bdi dir="ltr">{formatClock(next.mins, clockStyle)}</bdi>
-            </p>
-            <p className="mt-2 flex items-center justify-start gap-2 text-sm text-white/85">
-              <span>متبقي</span>
-              <span className="tabular-nums" dir="ltr">{countdown(next.inMin, now)}</span>
-              <Hourglass />
-            </p>
-            <div className="mt-5 flex items-center justify-between gap-2 text-sm">
-              <button
-                type="button"
-                className="inline-flex items-center gap-1.5 text-white/95"
-                onClick={() => setTimesOpen((v) => !v)}
-              >
-                <Calendar />
-                <span>الصلاة التالية</span>
-              </button>
-              <span className="text-white/90">الشروق</span>
-              <span className="rounded-full bg-black/30 px-3 py-1 text-sm font-medium">
-                <bdi dir="ltr">{formatClock(clock.sunrise, clockStyle)}</bdi>
-              </span>
-            </div>
-            {timesOpen ? (
-              <ul className="mt-3 grid grid-cols-2 gap-1.5 text-sm">
-                {ORDER.map((id) => (
-                  <li
-                    key={id}
-                    className={
-                      id === next.id
-                        ? "flex justify-between rounded-xl bg-white/20 px-2.5 py-1.5"
-                        : "flex justify-between rounded-xl bg-black/20 px-2.5 py-1.5 text-white/85"
-                    }
-                  >
-                    <span>{PRAYER_LABEL[id]}</span>
-                    <bdi dir="ltr" className="tabular-nums">{formatClock(clock[id], clockStyle)}</bdi>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        </section>
+        <PrayerHero
+          lat={lat}
+          lng={lng}
+          method={method}
+          clockStyle={clockStyle}
+          place={place}
+          sky={sky}
+          round={r}
+        />
 
         {showAdhkar ? (
           <Link
@@ -198,6 +142,101 @@ function Home() {
         ) : null}
       </main>
     </AppShell>
+  );
+}
+
+function PrayerHero({
+  lat,
+  lng,
+  method,
+  clockStyle,
+  place,
+  sky,
+  round,
+}: {
+  lat: number;
+  lng: number;
+  method: PrayerMethod;
+  clockStyle: "ampm" | "ar";
+  place: string;
+  sky: boolean;
+  round: string;
+}) {
+  const [now, setNow] = useState(() => new Date());
+  const [timesOpen, setTimesOpen] = useState(false);
+
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(t);
+  }, []);
+
+  const clock = useMemo(
+    () => prayerMinutes(lat, lng, now, method),
+    [lat, lng, method, now.getFullYear(), now.getMonth(), now.getDate()],
+  );
+  const next = nextPrayer(clock, now);
+
+  return (
+    <section
+      className={sky ? "prayer-hero relative overflow-hidden text-white" : "prayer-hero is-flat relative overflow-hidden text-white"}
+      style={{ borderRadius: round }}
+    >
+      <div className="relative z-10 p-4 pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <p className="flex items-center gap-1.5 text-sm text-white/90">
+            الصلاة القادمة
+            <Bell />
+          </p>
+          <Link
+            to="/qibla"
+            className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs"
+          >
+            <span>{place}</span>
+            <Pin />
+          </Link>
+        </div>
+        <p className="mt-7 text-start font-arabic text-[3.15rem] leading-none">{PRAYER_LABEL[next.id]}</p>
+        <p className="mt-2 text-start text-[2.05rem] font-semibold tracking-tight">
+          <bdi dir="ltr">{formatClock(next.mins, clockStyle)}</bdi>
+        </p>
+        <p className="mt-2 flex items-center justify-start gap-2 text-sm text-white/85">
+          <span>متبقي</span>
+          <span className="tabular-nums" dir="ltr">{countdown(next.inMin, now)}</span>
+          <Hourglass />
+        </p>
+        <div className="mt-5 flex items-center justify-between gap-2 text-sm">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 text-white/95"
+            onClick={() => setTimesOpen((v) => !v)}
+          >
+            <Calendar />
+            <span>الصلاة التالية</span>
+          </button>
+          <span className="text-white/90">الشروق</span>
+          <span className="rounded-full bg-black/30 px-3 py-1 text-sm font-medium">
+            <bdi dir="ltr">{formatClock(clock.sunrise, clockStyle)}</bdi>
+          </span>
+        </div>
+        {timesOpen ? (
+          <ul className="mt-3 grid grid-cols-2 gap-1.5 text-sm">
+            {ORDER.map((id) => (
+              <li
+                key={id}
+                className={
+                  id === next.id
+                    ? "flex justify-between rounded-xl bg-white/20 px-2.5 py-1.5"
+                    : "flex justify-between rounded-xl bg-black/20 px-2.5 py-1.5 text-white/85"
+                }
+              >
+                <span>{PRAYER_LABEL[id]}</span>
+                <bdi dir="ltr" className="tabular-nums">{formatClock(clock[id], clockStyle)}</bdi>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    </section>
   );
 }
 

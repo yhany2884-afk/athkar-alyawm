@@ -28,6 +28,18 @@ export function ThemeRoot({ children }: { children: ReactNode }) {
     applyThemeToDocument(settings);
   }, [settings]);
 
+  useEffect(() => {
+    const warm = () => {
+      void import("@/lib/quran/load");
+    };
+    const idle = window.requestIdleCallback?.(warm, { timeout: 4000 });
+    if (idle != null) {
+      return () => window.cancelIdleCallback?.(idle);
+    }
+    const t = window.setTimeout(warm, 1800);
+    return () => window.clearTimeout(t);
+  }, []);
+
   return (
     <div
       className="relative min-h-dvh"

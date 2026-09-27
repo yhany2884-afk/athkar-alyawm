@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout";
 import { TocRow } from "@/components/toc-row";
-import { QURAN } from "@/lib/quran/load";
 import { SURAHS } from "@/lib/quran/meta";
 import { JUZ } from "@/lib/quran/juz";
 import { useAppStore } from "@/lib/store";
@@ -10,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/quran/")({ component: QuranIndex });
 
-const AYAH_TOTAL = QURAN.reduce((n, s) => n + s.verses.length, 0);
+const AYAH_TOTAL = SURAHS.reduce((n, s) => n + s.count, 0);
 
 function QuranIndex() {
   const lastSurah = useAppStore((s) => s.lastSurah);
@@ -32,7 +31,7 @@ function QuranIndex() {
           بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
         </p>
         <p className="mt-2 mb-6 text-center text-xs text-muted">
-          {QURAN.length} سورة · {AYAH_TOTAL} آية · رواية حفص عن عاصم
+          {SURAHS.length} سورة · {AYAH_TOTAL} آية · رواية حفص عن عاصم
         </p>
 
         {last ? (

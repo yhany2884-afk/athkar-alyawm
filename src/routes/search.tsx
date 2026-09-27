@@ -1,10 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout";
 import { DhikrCard } from "@/components/dhikr-card";
 import { searchAdhkar } from "@/lib/adhkar";
 import { searchBooks } from "@/lib/library";
-import { searchQuran } from "@/lib/quran/load";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -16,13 +15,26 @@ function SearchPage() {
   const custom = useAppStore((s) => s.custom);
   const progress = useAppStore((s) => s.progress);
   const [q, setQ] = useState("");
+  const deferred = useDeferredValue(q);
   const [tab, setTab] = useState<Tab>("adhkar");
-  const adhkar = useMemo(() => searchAdhkar(q, custom), [q, custom]);
-  const books = useMemo(() => searchBooks(q), [q]);
-  const ayahs = useMemo(
-    () => (tab === "quran" ? searchQuran(q) : []),
-    [q, tab],
-  );
+  const [ayahs, setAyahs] = useState<{ surah: number; name: string; ayah: number; text: string }[]>([]);
+  const adhkar = useMemo(() => searchAdhkar(deferred, custom), [deferred, custom]);
+  const books = useMemo(() => searchBooks(deferred), [deferred]);
+
+  useEffect(() => {
+    if (tab !== "quran" || deferred.trim().length < 2) {
+      setAyahs([]);
+      return;
+    }
+    let live = true;
+    void import("@/lib/quran/load").then((mod) => {
+      if (!live) return;
+      setAyahs(mod.searchQuran(deferred));
+    });
+    return () => {
+      live = false;
+    };
+  }, [deferred, tab]);
 
   return (
     <AppShell title="بحث">
