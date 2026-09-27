@@ -57,14 +57,11 @@ export function AppShell({
           )}
           <Link
             to="/settings"
-            aria-label="تخصيص المظهر"
+            aria-label="تخصيص"
             title="تخصيص"
-            className={cn(
-              "grid size-11 place-items-center tap",
-              pathname.startsWith("/settings") ? "text-accent" : "text-fg",
-            )}
+            className={cn("tune-btn tap", pathname.startsWith("/settings") && "is-on")}
           >
-            <MenuIcon />
+            <TuneIcon />
           </Link>
         </div>
       </header>
@@ -80,7 +77,7 @@ export function AppShell({
                 : pathname === item.to || pathname.startsWith(`${item.to}/`);
             return (
               <li key={item.to}>
-                <Link to={item.to} className={cn("nav-tab", active && "is-on", item.icon === "home" && "is-home")}>
+                <Link to={item.to} className={cn("nav-tab", active && "is-on")}>
                   <span className="nav-ico" aria-hidden="true">
                     <NavIcon name={item.icon} />
                   </span>
@@ -148,10 +145,13 @@ function SearchIcon() {
     </svg>
   );
 }
-function MenuIcon() {
+function TuneIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6 4v16M12 4v16M18 4v16" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <circle cx="6" cy="9" r="2.1" fill="currentColor" />
+      <circle cx="12" cy="15" r="2.1" fill="currentColor" />
+      <circle cx="18" cy="8" r="2.1" fill="currentColor" />
     </svg>
   );
 }

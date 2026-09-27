@@ -1,31 +1,8 @@
-/** إحداثيات الكعبة (نفس موضع خرائط جوجل) — الحساب محلي بلا شبكة. */
+/** إحداثيات الكعبة كما تنشرها قبلة جوجل. الحساب محلي بلا شبكة. */
 export const KAABA = {
-  lat: 21.422487,
-  lng: 39.826206,
+  lat: 21.4225,
+  lng: 39.8262,
 };
-
-export const CITIES: { name: string; lat: number; lng: number }[] = [
-  { name: "الجيزة", lat: 30.0131, lng: 31.2089 },
-  { name: "القاهرة", lat: 30.0444, lng: 31.2357 },
-  { name: "الإسكندرية", lat: 31.2001, lng: 29.9187 },
-  { name: "مكة المكرمة", lat: 21.4225, lng: 39.8262 },
-  { name: "المدينة المنورة", lat: 24.4672, lng: 39.6024 },
-  { name: "الرياض", lat: 24.7136, lng: 46.6753 },
-  { name: "جدة", lat: 21.4858, lng: 39.1925 },
-  { name: "عمّان", lat: 31.9454, lng: 35.9284 },
-  { name: "دمشق", lat: 33.5138, lng: 36.2765 },
-  { name: "القدس", lat: 31.7683, lng: 35.2137 },
-  { name: "بغداد", lat: 33.3152, lng: 44.3661 },
-  { name: "الكويت", lat: 29.3759, lng: 47.9774 },
-  { name: "الدوحة", lat: 25.2854, lng: 51.531 },
-  { name: "أبوظبي", lat: 24.4539, lng: 54.3773 },
-  { name: "صنعاء", lat: 15.3694, lng: 44.191 },
-  { name: "الخرطوم", lat: 15.5007, lng: 32.5599 },
-  { name: "تونس", lat: 36.8065, lng: 10.1815 },
-  { name: "الجزائر", lat: 36.7538, lng: 3.0588 },
-  { name: "الرباط", lat: 34.0209, lng: -6.8416 },
-  { name: "إسطنبول", lat: 41.0082, lng: 28.9784 },
-];
 
 function toRad(d: number) {
   return (d * Math.PI) / 180;
@@ -48,13 +25,17 @@ export function lerpAngle(a: number, b: number, t: number): number {
   return norm360(a + angleDelta(a, b) * t);
 }
 
-/** اتجاه القبلة بالدرجات من الشمال الجغرافي. */
+/**
+ * اتجاه القبلة من الشمال الجغرافي.
+ * نفس معادلة قبلة جوجل:
+ * atan2( sin(λك − λ) , cos φ · tan φك − sin φ · cos(λك − λ) )
+ */
 export function qiblaBearing(lat: number, lng: number): number {
-  const φ1 = toRad(lat);
-  const φ2 = toRad(KAABA.lat);
+  const φ = toRad(lat);
+  const φk = toRad(KAABA.lat);
   const Δλ = toRad(KAABA.lng - lng);
-  const y = Math.sin(Δλ) * Math.cos(φ2);
-  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  const y = Math.sin(Δλ);
+  const x = Math.cos(φ) * Math.tan(φk) - Math.sin(φ) * Math.cos(Δλ);
   return norm360(toDeg(Math.atan2(y, x)));
 }
 
@@ -99,25 +80,26 @@ export function magneticDeclination(lat: number, lon: number): number {
   return v00 * (1 - tx) * (1 - ty) + v10 * tx * (1 - ty) + v01 * (1 - tx) * ty + v11 * tx * ty;
 }
 
-/** اتجاه الجهاز من أحداث البوصلة (شمال مغناطيسي). */
-export function headingFromEvent(e: DeviceOrientationEvent): number | null {
+export type HeadingFix = { deg: number; magnetic: boolean };
+
+/**
+ * اتجاه أعلى الشاشة.
+ * آيفون: webkitCompassHeading (شمال مغناطيسي) كما تفعل قبلة جوجل.
+ * أندرويد: deviceorientationabsolute بمعادلة البوصلة من مواصفة W3C (شمال حقيقي).
+ */
+export function headingFromEvent(e: DeviceOrientationEvent): HeadingFix | null {
   const ev = e as DeviceOrientationEvent & { webkitCompassHeading?: number };
   if (typeof ev.webkitCompassHeading === "number" && !Number.isNaN(ev.webkitCompassHeading)) {
-    return norm360(ev.webkitCompassHeading);
+    return { deg: norm360(ev.webkitCompassHeading), magnetic: true };
   }
-  if (e.alpha == null) return null;
-  const fromEuler = compassFromEuler(e.alpha, e.beta ?? 0, e.gamma ?? 0);
-  return norm360(fromEuler + screenOffset());
+  if (e.absolute !== true || e.alpha == null) return null;
+  return {
+    deg: norm360(compassFromEuler(e.alpha, e.beta ?? 0, e.gamma ?? 0)),
+    magnetic: false,
+  };
 }
 
-function screenOffset(): number {
-  const so = window.screen?.orientation?.angle;
-  if (typeof so === "number") return so;
-  const wo = (window as Window & { orientation?: number }).orientation;
-  return typeof wo === "number" ? wo : 0;
-}
-
-/** من مواصفة W3C / Compass.js — أدق من alpha وحده عند إمالة الهاتف. */
+/** من مثال البوصلة في مواصفة الاتجاه: اتجاه المستخدم والهاتف أمام وجهه. */
 function compassFromEuler(alpha: number, beta: number, gamma: number): number {
   const _x = toRad(beta);
   const _y = toRad(gamma);
@@ -130,7 +112,9 @@ function compassFromEuler(alpha: number, beta: number, gamma: number): number {
   const sZ = Math.sin(_z);
   const Vx = -cZ * sY - sZ * sX * cY;
   const Vy = -sZ * sY + cZ * sX * cY;
-  return toDeg(Math.atan2(Vx, Vy));
+  if (Math.abs(Vx) < 1e-6 && Math.abs(Vy) < 1e-6) return norm360(360 - alpha);
+  let h = Math.atan2(Vx, Vy);
+  return toDeg(h);
 }
 
 export function formatDeg(n: number): string {

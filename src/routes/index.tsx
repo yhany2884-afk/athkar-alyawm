@@ -36,7 +36,7 @@ function Home() {
     return () => window.clearInterval(t);
   }, []);
 
-  const place = qibla?.label || "القاهرة";
+  const place = "موقعك";
   const lat = qibla?.lat ?? 30.0444;
   const lng = qibla?.lng ?? 31.2357;
   const greet = periodGreeting(periodNow);

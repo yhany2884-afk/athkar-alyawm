@@ -251,60 +251,88 @@ html[data-glass="0"] .nav-glass,
   justify-content: flex-end;
   padding: 0.2rem 0.1rem 0.35rem;
   color: var(--color-muted);
-  transition:
-    color 220ms var(--ease-out),
-    transform 150ms var(--ease-out);
+  transition: color calc(220ms * var(--motion, 1)) var(--ease-out);
 }
 .nav-tab.is-on {
   color: var(--color-accent);
-}
-.nav-tab:active {
-  transform: scale(0.96);
-}
-.nav-pill {
-  position: absolute;
-  inset: 0.38rem 0.2rem;
-  border-radius: 999px;
-  background: color-mix(in oklab, #fff 46%, var(--color-accent) 12%);
-  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 70%, transparent);
-  opacity: 0;
-  transform: scale(0.25);
-  filter: blur(4px);
-  transition:
-    opacity 280ms var(--ease-out),
-    transform 280ms var(--ease-out),
-    filter 280ms var(--ease-out);
-}
-.nav-tab.is-on .nav-pill {
-  opacity: 1;
-  transform: scale(1);
-  filter: blur(0);
-}
-.nav-tab:active .nav-pill {
-  transform: scale(1.06);
 }
 .nav-ico {
   display: grid;
   width: 1.5rem;
   height: 1.5rem;
   place-items: center;
-}
-.nav-tab.is-home.is-on .nav-ico {
-  width: 3.35rem;
-  height: 3.35rem;
-  margin-top: -1.45rem;
-  margin-bottom: 0.05rem;
   border-radius: 999px;
+  transition:
+    width calc(220ms * var(--motion, 1)) var(--ease-out),
+    height calc(220ms * var(--motion, 1)) var(--ease-out),
+    margin calc(220ms * var(--motion, 1)) var(--ease-out),
+    background-color calc(200ms * var(--motion, 1)) var(--ease-out),
+    color calc(180ms * var(--motion, 1)) var(--ease-out),
+    transform calc(120ms * var(--motion, 1)) var(--ease-out),
+    box-shadow calc(200ms * var(--motion, 1)) var(--ease-out);
+}
+.nav-tab.is-on .nav-ico {
+  width: 3.15rem;
+  height: 3.15rem;
+  margin-top: -1.35rem;
+  margin-bottom: 0.05rem;
   background: var(--color-accent);
   color: var(--color-accent-fg);
   box-shadow: 0 8px 16px color-mix(in oklab, var(--color-accent) 34%, transparent);
 }
-.nav-tab.is-home.is-on .nav-label {
+.nav-tab:active .nav-ico {
+  transform: scale(0.88);
+}
+.nav-tab.is-on .nav-label {
   color: var(--color-fg);
   font-weight: 600;
 }
-.nav-tab.is-on:not(.is-home) {
+.tune-btn {
+  display: grid;
+  width: 2.55rem;
+  height: 2.55rem;
+  place-items: center;
+  border-radius: 999px;
   color: var(--color-accent);
+  background: color-mix(in oklab, var(--color-accent) 12%, var(--color-elevated));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-accent) 32%, transparent);
+}
+.tune-btn.is-on {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+.hue-ring {
+  position: relative;
+  width: 12.5rem;
+  height: 12.5rem;
+  margin-inline: auto;
+  border-radius: 999px;
+  background: conic-gradient(from 0deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  touch-action: none;
+}
+.hue-ring::before {
+  content: "";
+  position: absolute;
+  inset: 1.55rem;
+  border-radius: 999px;
+  background: var(--color-elevated);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-fg) 8%, transparent);
+}
+.hue-knob {
+  position: absolute;
+  z-index: 1;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px color-mix(in oklab, #000 35%, transparent);
+  transform: translate(-50%, -50%);
+}
+.hue-core {
+  position: absolute;
+  inset: 2.55rem;
+  z-index: 1;
+  border-radius: 999px;
 }
 .wordmark {
   font-family: "Amiri", "Noto Naskh Arabic", serif;
@@ -352,7 +380,7 @@ html[data-glass="0"] .nav-glass,
 }
 
 .page-enter {
-  animation: page-in 220ms var(--ease-out) both;
+  animation: page-in calc(220ms * var(--motion, 1)) var(--ease-out) both;
 }
 @keyframes page-in {
   from {
@@ -379,17 +407,17 @@ html[data-glass="0"] .nav-glass,
   width: 7.25rem;
   height: 7.25rem;
   border-radius: 1.6rem;
-  animation: splash-in 640ms var(--ease-out) both;
+  animation: splash-in calc(640ms * var(--motion, 1)) var(--ease-out) both;
 }
 .splash-title {
   margin: 0;
   font-family: var(--font-arabic);
   font-size: 1.55rem;
   color: var(--color-fg);
-  animation: splash-in 640ms var(--ease-out) 80ms both;
+  animation: splash-in calc(640ms * var(--motion, 1)) var(--ease-out) 80ms both;
 }
 .splash.is-out {
-  animation: splash-out 400ms ease-in forwards;
+  animation: splash-out calc(400ms * var(--motion, 1)) ease-in forwards;
 }
 @keyframes splash-in {
   from {
@@ -426,7 +454,6 @@ html[data-app="closing"] .app-shell {
   .splash-title,
   .splash.is-out,
   html[data-app="closing"] .app-shell,
-  .nav-pill,
   .nav-tab {
     animation: none;
     transition: none;

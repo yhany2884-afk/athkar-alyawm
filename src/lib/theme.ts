@@ -11,7 +11,18 @@ export type UiFontId = "cairo" | "plex" | "amiri";
 
 export type NavStyle = "float" | "dock";
 
-export type PresetId = "day" | "paper" | "white" | "night" | "ink" | "custom";
+export type PresetId =
+  | "day"
+  | "paper"
+  | "white"
+  | "night"
+  | "ink"
+  | "garden"
+  | "gold"
+  | "sea"
+  | "rose"
+  | "olive"
+  | "custom";
 
 export type ThemeSettings = {
   preset: PresetId;
@@ -52,6 +63,7 @@ export type ThemeSettings = {
   homeContinue: boolean;
   prayerSky: boolean;
   mark: string;
+  animSpeed: number;
 };
 
 export type ThemePreset = {
@@ -121,6 +133,61 @@ export const PRESETS: ThemePreset[] = [
     muted: "#8B939C",
     accent: "#5B8FA8",
     accentFg: "#111416",
+  },
+  {
+    id: "garden",
+    name: "حديقة",
+    bg: "#F3F7F2",
+    surface: "#E4EEE3",
+    elevated: "#FFFFFF",
+    fg: "#1C2A22",
+    muted: "#6A7A70",
+    accent: "#1F6B4A",
+    accentFg: "#FFFFFF",
+  },
+  {
+    id: "gold",
+    name: "ذهب",
+    bg: "#FBF6EA",
+    surface: "#F3E8CC",
+    elevated: "#FFFCF4",
+    fg: "#2C2416",
+    muted: "#7A6E58",
+    accent: "#8C6239",
+    accentFg: "#FFFCF4",
+  },
+  {
+    id: "sea",
+    name: "بحر",
+    bg: "#F2F7F8",
+    surface: "#E1EEEF",
+    elevated: "#FFFFFF",
+    fg: "#1A2A30",
+    muted: "#667880",
+    accent: "#0E7490",
+    accentFg: "#FFFFFF",
+  },
+  {
+    id: "rose",
+    name: "ورد",
+    bg: "#FBF4F4",
+    surface: "#F3E4E4",
+    elevated: "#FFFFFF",
+    fg: "#2C1E22",
+    muted: "#7C6A70",
+    accent: "#8E4B5B",
+    accentFg: "#FFFFFF",
+  },
+  {
+    id: "olive",
+    name: "زيتون",
+    bg: "#F6F5EE",
+    surface: "#E8E6D6",
+    elevated: "#FFFDF6",
+    fg: "#24261C",
+    muted: "#6E7264",
+    accent: "#5C6B3A",
+    accentFg: "#FFFDF6",
   },
 ];
 
@@ -201,6 +268,7 @@ export const DEFAULT_SETTINGS: ThemeSettings = {
   homeContinue: true,
   prayerSky: true,
   mark: "#1F6B4A",
+  animSpeed: 3,
 };
 
 export function fontStack(
@@ -236,6 +304,7 @@ export function applyThemeToDocument(s: ThemeSettings) {
   const blur = s.navBlur ?? 64;
   const spec = s.navSpecular ?? 58;
   const glass = s.liquidGlass !== false;
+  const motion = [1.7, 1.3, 1, 0.72, 0.45][Math.max(0, Math.min(4, (s.animSpeed ?? 3) - 1))] ?? 1;
   const vars: Record<string, string> = {
     "--color-bg": s.bg,
     "--color-surface": s.surface,
@@ -266,6 +335,7 @@ export function applyThemeToDocument(s: ThemeSettings) {
     "--nav-sat": String(1.05 + spec * 0.007),
     "--nav-spec": `${Math.round(18 + spec * 0.55)}%`,
     "--radius-card": `${s.cardRound ?? 24}px`,
+    "--motion": String(motion),
   };
   for (const [k, v] of Object.entries(vars)) {
     r.style.setProperty(k, v);

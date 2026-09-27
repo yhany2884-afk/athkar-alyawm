@@ -62,6 +62,7 @@ function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
+  const [paint, setPaint] = useState<"accent" | "mark" | "bg">("accent");
 
   async function onPick(file: File | undefined) {
     if (!file || !file.type.startsWith("image/")) return;
@@ -417,10 +418,70 @@ function SettingsPage() {
             max={100}
             onChange={(navSpecular) => patch({ navSpecular })}
           />
+          <div className="mt-4">
+            <Range
+              label="سرعة الحركة"
+              value={settings.animSpeed ?? 3}
+              min={1}
+              max={5}
+              onChange={(animSpeed) => patch({ animSpeed })}
+            />
+            <p className="mt-1 text-xs text-muted">
+              {(settings.animSpeed ?? 3) <= 2
+                ? "هادئة"
+                : (settings.animSpeed ?? 3) >= 4
+                  ? "سريعة"
+                  : "متوسطة"}
+              {" — "}تشمل فتح التطبيق والانتقال وضغطة الشريط
+            </p>
+          </div>
         </section>
 
         <section>
           <h2 className="mb-3 text-sm font-semibold">الألوان</h2>
+          <div className="mb-3 flex gap-2">
+            {(
+              [
+                ["accent", "المميز"],
+                ["mark", "الاسم"],
+                ["bg", "الخلفية"],
+              ] as const
+            ).map(([id, name]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setPaint(id)}
+                className={cn(
+                  "tap h-10 flex-1 text-sm",
+                  paint === id ? "bg-accent text-accent-fg" : "border border-fg/12 bg-elevated",
+                )}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+          <ColorWheel
+            value={settings[paint]}
+            onChange={(hex) => patch({ [paint]: hex })}
+          />
+          <div className="mt-4 grid grid-cols-6 gap-2">
+            {SWATCHES.map((c) => (
+              <button
+                key={c}
+                type="button"
+                aria-label={c}
+                onClick={() => patch({ [paint]: c })}
+                className="tap aspect-square rounded-full"
+                style={{
+                  background: c,
+                  boxShadow:
+                    settings[paint].toLowerCase() === c.toLowerCase()
+                      ? "0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent)"
+                      : "inset 0 0 0 1px color-mix(in oklab, #000 12%, transparent)",
+                }}
+              />
+            ))}
+          </div>
           <ColorField
             label="الخلفية"
             value={settings.bg}
@@ -613,6 +674,137 @@ function SettingsPage() {
         </section>
       </main>
     </AppShell>
+  );
+}
+
+function hexToHsv(hex: string) {
+  const h = hex.replace("#", "");
+  const r = Number.parseInt(h.slice(0, 2), 16) / 255;
+  const g = Number.parseInt(h.slice(2, 4), 16) / 255;
+  const b = Number.parseInt(h.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let hue = 0;
+  if (d) {
+    if (max === r) hue = ((g - b) / d) % 6;
+    else if (max === g) hue = (b - r) / d + 2;
+    else hue = (r - g) / d + 4;
+    hue *= 60;
+    if (hue < 0) hue += 360;
+  }
+  return { h: hue, s: max === 0 ? 0 : d / max, v: max };
+}
+
+function hsvToHex(h: number, s: number, v: number) {
+  const c = v * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = v - c;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+  const to = (n: number) =>
+    Math.round((n + m) * 255)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${to(r)}${to(g)}${to(b)}`;
+}
+
+const SWATCHES = [
+  "#163A5F",
+  "#1F6B4A",
+  "#8C6239",
+  "#8E4B5B",
+  "#0E7490",
+  "#5C6B3A",
+  "#6B4C9A",
+  "#B45309",
+  "#9F1239",
+  "#155E75",
+  "#3F6212",
+  "#1C1917",
+];
+
+function ColorWheel({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (hex: string) => void;
+}) {
+  const ring = useRef<HTMLDivElement>(null);
+  const hsv = hexToHsv(/^#[0-9a-fA-F]{6}$/.test(value) ? value : "#163A5F");
+
+  function pick(clientX: number, clientY: number) {
+    const el = ring.current;
+    if (!el) return;
+    const box = el.getBoundingClientRect();
+    const x = clientX - box.left - box.width / 2;
+    const y = clientY - box.top - box.height / 2;
+    let deg = (Math.atan2(x, -y) * 180) / Math.PI;
+    if (deg < 0) deg += 360;
+    onChange(hsvToHex(deg, Math.max(hsv.s, 0.62), Math.max(hsv.v, 0.42)));
+  }
+
+  return (
+    <div>
+      <div
+        ref={ring}
+        className="hue-ring"
+        onPointerDown={(e) => {
+          (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+          pick(e.clientX, e.clientY);
+        }}
+        onPointerMove={(e) => {
+          if (e.buttons === 0) return;
+          pick(e.clientX, e.clientY);
+        }}
+      >
+        <span
+          className="hue-knob"
+          style={{
+            left: `${50 + 38 * Math.sin((hsv.h * Math.PI) / 180)}%`,
+            top: `${50 - 38 * Math.cos((hsv.h * Math.PI) / 180)}%`,
+            background: hsvToHex(hsv.h, 1, 1),
+          }}
+        />
+        <span className="hue-core" style={{ background: value }} />
+      </div>
+      <label className="mt-4 block">
+        <span className="mb-1 flex justify-between text-xs text-muted">
+          التشبع
+          <span>{Math.round(hsv.s * 100)}</span>
+        </span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={Math.round(hsv.s * 100)}
+          onChange={(e) => onChange(hsvToHex(hsv.h, Number(e.target.value) / 100, hsv.v))}
+          className="w-full accent-[var(--color-accent)]"
+        />
+      </label>
+      <label className="mt-2 block">
+        <span className="mb-1 flex justify-between text-xs text-muted">
+          السطوع
+          <span>{Math.round(hsv.v * 100)}</span>
+        </span>
+        <input
+          type="range"
+          min={8}
+          max={100}
+          value={Math.round(hsv.v * 100)}
+          onChange={(e) => onChange(hsvToHex(hsv.h, hsv.s, Number(e.target.value) / 100))}
+          className="w-full accent-[var(--color-accent)]"
+        />
+      </label>
+    </div>
   );
 }
 

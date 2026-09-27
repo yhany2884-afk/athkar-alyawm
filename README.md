@@ -10,7 +10,7 @@
 
 https://github.com/yhany2884-afk/athkar-alyawm
 
-## تنزيل النسخة 1.3.1
+## تنزيل النسخة 1.3.2
 
 احذف تطبيق أذكار اليوم القديم من الهاتف، واحذف ملف التثبيت القديم من مجلد التنزيلات، ثم ثبّت الملف الجديد فقط.
 
@@ -18,9 +18,9 @@ https://github.com/yhany2884-afk/athkar-alyawm/releases/latest
 
 | الجهاز | الملف |
 | --- | --- |
-| أندرويد | [athkar-alyawm-1.3.1.apk](https://github.com/yhany2884-afk/athkar-alyawm/releases/download/v1.3.1/athkar-alyawm-1.3.1.apk) |
-| ويندوز | [athkar-alyawm-windows.zip](https://github.com/yhany2884-afk/athkar-alyawm/releases/download/v1.3.1/athkar-alyawm-windows.zip) |
-| ماك | [athkar-alyawm-mac.zip](https://github.com/yhany2884-afk/athkar-alyawm/releases/download/v1.3.1/athkar-alyawm-mac.zip) |
+| أندرويد | [athkar-alyawm-1.3.2.apk](https://github.com/yhany2884-afk/athkar-alyawm/releases/download/v1.3.2/athkar-alyawm-1.3.2.apk) |
+| ويندوز | [athkar-alyawm-windows.zip](https://github.com/yhany2884-afk/athkar-alyawm/releases/download/v1.3.2/athkar-alyawm-windows.zip) |
+| ماك | [athkar-alyawm-mac.zip](https://github.com/yhany2884-afk/athkar-alyawm/releases/download/v1.3.2/athkar-alyawm-mac.zip) |
 
 ## النسخ الأصلية لكل منصة
 

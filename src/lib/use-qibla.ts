@@ -51,11 +51,11 @@ export function useQibla(): QiblaLive {
     (e: DeviceOrientationEvent, abs: boolean) => {
       if (abs) absUsed.current = true;
       else if (absUsed.current) return;
-      const mag = headingFromEvent(e);
-      if (mag == null) return;
+      const fix = headingFromEvent(e);
+      if (!fix) return;
       const loc = useAppStore.getState().qibla;
-      const dec = loc ? magneticDeclination(loc.lat, loc.lng) : 0;
-      const trueH = (mag + dec + 360) % 360;
+      const dec = fix.magnetic && loc ? magneticDeclination(loc.lat, loc.lng) : 0;
+      const trueH = (fix.deg + dec + 360) % 360;
       if (smooth.current == null) smooth.current = trueH;
       else smooth.current = lerpAngle(smooth.current, trueH, 0.22);
       setHeading(smooth.current);
